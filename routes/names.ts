@@ -1,8 +1,9 @@
-import express from "express";
+import express, {Request, Response} from "express";
 import { prisma } from "../lib/prisma.js";
 
 const router = express.Router();
 
+/* GET all */
 router.get("/", async (req, res) => {
   try {
     const names = await prisma.names.findMany();
@@ -13,6 +14,27 @@ router.get("/", async (req, res) => {
   }
 });
 
+/* GET by id */
+router.get("/:id", async (req, res) => {
+   try {
+    const { id } = req.params;
+
+    const name = await prisma.names.findUnique({
+      where: { id },
+    });
+
+    if (!name) {
+      return res.status(404).json({ error: "Not found" });
+    }
+
+    res.json(name);
+  } catch (error) {
+    console.error("GET /names/:id error:", error);
+    res.status(500).json({ error: "Kunne ikke hente data" });
+  }
+});
+
+/* POST */
 router.post("/post", async (req, res) => {
   try {
     const { name, lastname } = req.body;
@@ -32,6 +54,7 @@ router.post("/post", async (req, res) => {
   }
 });
 
+/* PATCH */
 router.patch("/patch/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -53,6 +76,7 @@ router.patch("/patch/:id", async (req, res) => {
   }
 });
 
+/* DELETE */
 router.delete("/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
